@@ -56,11 +56,10 @@ namespace ZooManagementSystem
     class Program
     {
         static List<Animal> animals = new List<Animal>();
-        //creates a list of all of the user's animals within the class scope. Purchased animals will be added to this list
         static Stack<Animal> shopAnimals = new Stack<Animal>();
+        static HashSet<Animal> uniqueAnimals = new HashSet<Animal>();
         static decimal userMoney = 0;
         static decimal userIncome = 0;
-        static HashSet<Animal> uniqueAnimals = new HashSet<Animal>();
         static System.Timers.Timer timer1;
         static void MainMenu()
         {
@@ -106,7 +105,7 @@ namespace ZooManagementSystem
             Console.WriteLine("Press enter to return to the main menu.");
             Console.ReadLine();
             Console.Clear();
-            MainMenu(); //Once the user hits the enter key, they are sent back to the main menu
+            MainMenu(); //Once the user hits the enter key, they are sent back to the main menu 
         }
         static void InitializeShop()
         {
