@@ -61,6 +61,7 @@ namespace ZooManagementSystem
         static decimal userMoney = 0;
         static decimal userIncome = 0;
         static HashSet<Animal> uniqueAnimals = new HashSet<Animal>();
+        static System.Timers.Timer timer1;
         static void MainMenu()
         {
             Console.WriteLine("Welcome to the Zoo Management System! Please choose an option. \na) Animal Database \nb) Shop \nc) Save and Exit");
@@ -79,10 +80,7 @@ namespace ZooManagementSystem
                     Database();
                     break;
                 case "b":
-                    if(animals.Count == 0)
-                    {
-                        FreeShop();
-                    }
+                    if(animals.Count == 0) FreeShop();
                     else Shop();
                     break;
                 case "c":
@@ -94,6 +92,7 @@ namespace ZooManagementSystem
         }
         static void Database()
         {
+            Console.WriteLine("== Welcome to the Database! ==");
             if (animals.Count == 0)
                 Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
             else
@@ -121,7 +120,7 @@ namespace ZooManagementSystem
         {
             Animal[] currentAnimals = shopAnimals.ToArray();
             //Converts the stack shopAnimals into an array --> [0] = exoticness 3, [1] = exoticness 2, [2] = exoticness 1
-            Console.WriteLine($"Welcome to the shop!" + 
+            Console.WriteLine($"== Welcome to the shop! ==" + 
                               $"\na) {currentAnimals[2].name} the {currentAnimals[2].species}, $50" +
                               $"\nb) {currentAnimals[1].name} the {currentAnimals[1].species}, $150" +
                               $"\nc) {currentAnimals[0].name} the {currentAnimals[0].species}, $250" +
@@ -153,7 +152,7 @@ namespace ZooManagementSystem
         static void FreeShop()
         {
             Animal firstAnimal = new Animal("Rainier", "Rhino", 3);
-            Console.WriteLine($"Welcome to the shop!" +
+            Console.WriteLine($"== Welcome to the shop! ==" +
                 $"\na) {firstAnimal.name} the {firstAnimal.species}, FREE" +
                 $"\nb) Back to main menu");
             string menuChoice = Console.ReadLine().ToLower();
@@ -167,7 +166,7 @@ namespace ZooManagementSystem
                 case "a":
                     animals.Add(firstAnimal);
                     UpdateIncome();
-                    Console.WriteLine($"Purchased {firstAnimal.name} the {firstAnimal.species}. \nPress enter to go back to the main menu.");
+                    Console.WriteLine($"You purchased {firstAnimal.name} the {firstAnimal.species}! \nPress enter to go back to the main menu.");
                     Console.ReadLine();
                     Console.Clear();
                     MainMenu();
@@ -218,8 +217,21 @@ namespace ZooManagementSystem
         {
             string saveInfo = SaveInfo();
             File.WriteAllText("save.txt", saveInfo); //Writes the returned value of saveInfo to a .txt file
-            Console.WriteLine("Saving . . .");
-            Console.WriteLine("Data successfully saved!");
+            DateTime period = DateTime.Now;
+            int periodCount = 0;
+            Console.Write("Saving");
+            while (periodCount < 3)
+            {
+                if ((DateTime.Now - period).TotalSeconds >= 0.5)
+                {
+                    Console.Write(" .");
+                    period = DateTime.Now;
+                    periodCount++;
+                }
+            }
+            Console.WriteLine("\nData successfully saved! \nPress enter to close window.");
+            Console.ReadLine();
+
         }
         static string SaveInfo()
         {
@@ -288,12 +300,12 @@ namespace ZooManagementSystem
                 }
                 Console.WriteLine();
                 MainMenu();
-                System.Threading.Thread.Sleep(100);
-                if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
-                {
-                    SaveExit();
-                    break;
-                }
+                //System.Threading.Thread.Sleep(100);
+                //if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
+                //{
+                //    SaveExit();
+                //    break;
+                //}
             }
         }
     }
