@@ -1,25 +1,25 @@
-﻿using System.ComponentModel;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Text;
 
 namespace ZooManagementSystem
 {
-    class Animal
+    internal class Animal
     {
-        static Random rd = new Random();
-        public string name; public string species; public int income;
+        private static Random rd = new Random();
+        public string Name { get; set; }
+        public string Species { get; set; }
+        public int Income { get; set; }
         public Animal(string name, string species, int income)
         {
-            this.name = name;
-            this.species = species;
-            this.income = income;
+            this.Name = name;
+            this.Species = species;
+            this.Income = income;
         }
         public void DisplayAnimal()
         {
-            Console.WriteLine($"{name} the {species}, $/s: {income}");
+            Console.WriteLine($"{Name} the {Species}, $/s: {Income}");
         }
-        static string RandomName()
-        {
+        private static string RandomName()
+        { //names are from https://www.ssa.gov/oact/babynames/decades/century.html
             if (File.Exists("names.txt"))
             {
                 string[] lines = File.ReadAllLines("names.txt");
@@ -28,7 +28,7 @@ namespace ZooManagementSystem
             } //Returns a random line from names.txt
             else return "placeholder";
         }
-        enum Species
+        private enum SpeciesOptions
         {
             Elephant,
             Rhino,
@@ -39,9 +39,9 @@ namespace ZooManagementSystem
             Eagle,
             Whale
         }
-        static string RandomSpecies()
+        private static string RandomSpecies()
         {
-            string[] species = Enum.GetNames(typeof(Species));
+            string[] species = Enum.GetNames(typeof(SpeciesOptions));
             int n = rd.Next(species.Length);
             return species[n];
         } //Returns a random species from the Species enum
@@ -53,24 +53,25 @@ namespace ZooManagementSystem
             return new Animal(rName, rSpecies, rIncome);
         }
     }
-    class Program
+    internal class Program
     {
-        static List<Animal> animals = new List<Animal>();
-        static Animal[] shopAnimals = new Animal[3];
-        static decimal userMoney = 0;
-        static decimal userIncome = 0;
-        static DateTime lastIncomeTime;
-        static void MainMenu()
+        private static List<Animal> animals = new List<Animal>();
+        private static Animal[] shopAnimals = new Animal[3];
+        public static decimal UserMoney { get; set; }
+        public static decimal UserIncome { get; set; }
+
+        private static DateTime lastIncomeTime;
+        private static void MainMenu()
         {
             Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
             Console.Write($"\nCurrent Balance: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{userMoney}");
+            Console.Write($"{UserMoney}");
             Console.ResetColor();
 
             Console.Write($"\nIncome: +");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"${userIncome}"); //Prints current user money and income
+            Console.Write($"${UserIncome}"); //Prints current user money and income
             Console.ResetColor();
             Console.WriteLine(" per second");
 
@@ -100,7 +101,7 @@ namespace ZooManagementSystem
                     break;
             } //Calls the function that corresponds to the user's input
         }
-        static void Database()
+        private static void Database()
         {
             Console.WriteLine("== Welcome to the Database! ==");
             if (animals.Count == 0)
@@ -118,21 +119,21 @@ namespace ZooManagementSystem
             Console.Clear();
             MainMenu(); //Once the user hits the enter key, they are sent back to the main menu 
         }
-        static void InitializeShop()
+        private static void InitializeShop()
         {
             for (int i = 0; i < 3; i++)
             {
                 shopAnimals[i] = Animal.RandomAnimal(i + 1);
-                //Adds animals with varying exoticness to an array
+                //Adds animals with varying exoticness to an array. These are the first set of animals in the shop when the program is executed.
             }
         }
-        static void Shop()
+        private static void Shop()
         {
             Console.WriteLine($"== Welcome to the shop! ==");
             int basePrice = 0;
             for (int i = 0; i < shopAnimals.Length; i++)
             {
-                Console.WriteLine($"{(char)('a' + i)}) {shopAnimals[i].name} the {shopAnimals[i].species}, ${basePrice + 50*(i + 1)}");
+                Console.WriteLine($"{(char)('a' + i)}) {shopAnimals[i].Name} the {shopAnimals[i].Species}, ${basePrice + 50*(i + 1)}");
                 basePrice += 50;
             }
             Console.WriteLine($"d) Back to main menu");
@@ -160,9 +161,9 @@ namespace ZooManagementSystem
                 default: break;
             }
         }
-        static void PurchaseConfirmation(int price, string userChoice)
+        private static void PurchaseConfirmation(int price, string userChoice)
         {
-            if (userMoney >= price)
+            if (UserMoney >= price)
             {
                 Animal purchasedAnimal;
                 if (userChoice == "a")
@@ -180,21 +181,21 @@ namespace ZooManagementSystem
                     purchasedAnimal = shopAnimals[2];
                     shopAnimals[2] = Animal.RandomAnimal(3);
                 }
-                userMoney -= price;
+                UserMoney -= price;
                 animals.Add(purchasedAnimal); //Adds the purchased animal to the list of the user's animals
                 UpdateIncome();
-                Console.WriteLine($"You purchased {purchasedAnimal.name} the {purchasedAnimal.species} for ${price}!");
+                Console.WriteLine($"You purchased {purchasedAnimal.Name} the {purchasedAnimal.Species} for ${price}!");
             }
             else Console.WriteLine("Not enough money to purchase this animal.");
             Console.ReadLine();
             Console.Clear();
             Shop();
         }
-        static void FreeShop()
+        private static void FreeShop()
         {
             Animal firstAnimal = new Animal("Rainier", "Rhino", 3);
             Console.WriteLine($"== Welcome to the shop! ==" +
-                $"\na) {firstAnimal.name} the {firstAnimal.species}, FREE" +
+                $"\na) {firstAnimal.Name} the {firstAnimal.Species}, FREE" +
                 $"\nb) Back to main menu");
             string menuChoice = Console.ReadLine().ToLower();
             while (menuChoice != "a" && menuChoice != "b")
@@ -207,7 +208,7 @@ namespace ZooManagementSystem
                 case "a":
                     animals.Add(firstAnimal);
                     UpdateIncome();
-                    Console.WriteLine($"You purchased {firstAnimal.name} the {firstAnimal.species}! \nPress enter to go back to the main menu.");
+                    Console.WriteLine($"You purchased {firstAnimal.Name} the {firstAnimal.Species}! \nPress enter to go back to the main menu.");
                     Console.ReadLine();
                     Console.Clear();
                     MainMenu();
@@ -219,11 +220,11 @@ namespace ZooManagementSystem
                 default: break;
             }
         }
-        static void UpdateIncome()
+        private static void UpdateIncome()
         { //Adds up all of the income from the user's animals, to be received per second. When called, updates the user's income to include newly purchased animals
-            userIncome = animals.Sum(a => a.income);
+            UserIncome = animals.Sum(a => a.Income);
         }
-        static void SaveExit()
+        private static void SaveExit()
         {
             string saveInfo = SaveInfo();
             File.WriteAllText("save.txt", saveInfo); //Writes the returned value of saveInfo to a .txt file
@@ -241,17 +242,17 @@ namespace ZooManagementSystem
             }
             Console.WriteLine("\nData successfully saved!");
         }
-        static string SaveInfo()
+        private static string SaveInfo()
         {
             StringBuilder saveInfo = new StringBuilder();
-            saveInfo.AppendLine(userMoney.ToString());
+            saveInfo.AppendLine(UserMoney.ToString());
             foreach (Animal animal in animals)
             {
-                saveInfo.AppendLine($"{animal.name},{animal.species},{animal.income}");
+                saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income}");
             } //The first line of saveInfo is the user's money, every line after that is animal data
             return saveInfo.ToString();
         }
-        static void LoadSave()
+        private static void LoadSave()
         {
             if (File.Exists("save.txt"))
             {
@@ -260,12 +261,12 @@ namespace ZooManagementSystem
                 {
                     if (decimal.TryParse(lines[0], out decimal money)) //Loads the first line of save.txt as userMoney. If improperly formatted, userMoney will instead be set to 0
                     {
-                        userMoney = money;
+                        UserMoney = money;
                     }
                     else
                     {
                         Console.WriteLine("Invalid format in save file. Resetting user money to 0.\n");
-                        userMoney = 0;
+                        UserMoney = 0;
                     } 
                     for (int i = 1; i < lines.Length; i++)
                     {
@@ -282,22 +283,22 @@ namespace ZooManagementSystem
                 else
                 {
                     Console.WriteLine("Save file is empty. Starting fresh.\n");
-                    userMoney = 0;
+                    UserMoney = 0;
                 }
             }
             else
             {
                 Console.WriteLine("No save file found. Starting fresh.\n");
-                userMoney = 0;
+                UserMoney = 0;
             }
         }
-        static void CollectMoney()
+        private static void CollectMoney()
         {
             int secondsElapsed = (int)Math.Round((DateTime.Now - lastIncomeTime).TotalSeconds);
-            userMoney += userIncome * secondsElapsed;
+            UserMoney += UserIncome * secondsElapsed;
             Console.Write($"You earned ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"${userIncome * secondsElapsed} ");
+            Console.Write($"${UserIncome * secondsElapsed} ");
             Console.ResetColor();
             Console.WriteLine($"from your animals!");
             lastIncomeTime = DateTime.Now;
@@ -316,8 +317,6 @@ namespace ZooManagementSystem
         }
     }
 }
-
 /*
- * Animal naming .txt file
  * Try to incorporate inheritance or recursion, as well as data security features (public/private access modifiers, properties, interfaces)
  */
