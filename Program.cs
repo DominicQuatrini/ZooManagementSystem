@@ -157,7 +157,7 @@ namespace ZooManagementSystem
                     Program.Database();
                     break;
                 case "b":
-                    if (Program.animals.Count == 0) FreeShopManager.FreeShop();
+                    if (Program.userAnimals.Count == 0) FreeShopManager.FreeShop();
                     else ShopManager.Shop();
                     break;
                 case "c":
@@ -182,9 +182,18 @@ namespace ZooManagementSystem
     internal class ShopManager
     {
         internal static Animal[] shopAnimals = new Animal[3];
-        static int basePrice = 50; //Sets the price for shopAnimals[0] to $50, as well as affecting the calculations for other shop offers
-        static int mythicalFactor = 20; //Makes it easy to change mythical price (price * mythicalFactor)
-        static int regularFactor = 5; //Makes it easy to change regular price (price * regularFactor * i)
+        private static int priceA = 50;
+        private static int factorB = 5;  private static int priceB = priceA * factorB;
+        private static int factorC = 10; private static int priceC = priceA * factorC;
+        private static int factorM = 20; private static int priceM = priceA * factorM;
+        internal static void InitializeShop()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                shopAnimals[i] = Animal.RandomAnimal(i + 1);
+                //Adds animals with varying exoticness to an array. These are the first set of animals in the shop when the program is executed.
+            }
+        }
         private static void DisplayShopOffers(int i) //Prints each shop offer. Only one shop offer prints each time DisplayShopOffers(int i) is called
         {
             if (i >= shopAnimals.Length) return; //Stops the recursion if i is out of bounds for shopAnimals[i]
@@ -192,9 +201,10 @@ namespace ZooManagementSystem
             Console.Write($"{(char)('a' + i)}) ");
             shopAnimals[i].DisplayAnimal();
 
-            if (shopAnimals[i].IsMythical == true) Console.WriteLine($", ${basePrice * mythicalFactor}");
-            else if (i == 0) Console.WriteLine($", ${basePrice}");
-            else Console.WriteLine($", ${basePrice * regularFactor * i}");
+            if (shopAnimals[i].IsMythical == true) Console.WriteLine($", ${priceM}");
+            else if (i == 0) Console.WriteLine($", ${priceA}");
+            else if (i == 1) Console.WriteLine($", ${priceB}");
+            else Console.WriteLine($", ${priceC}");
             //Prints the corresponding price
 
             DisplayShopOffers(i + 1);
@@ -214,14 +224,14 @@ namespace ZooManagementSystem
             switch (menuChoice)
             {
                 case "a":
-                    PurchaseConfirmation(basePrice, menuChoice);
+                    PurchaseConfirmation(priceA, menuChoice);
                     break;
                 case "b":
-                    PurchaseConfirmation(basePrice * regularFactor, menuChoice);
+                    PurchaseConfirmation(priceB, menuChoice);
                     break;
                 case "c":
-                    if (shopAnimals[2].IsMythical == true) PurchaseConfirmation(basePrice * mythicalFactor, menuChoice);
-                    else PurchaseConfirmation(basePrice * 2 * regularFactor, menuChoice);
+                    if (shopAnimals[2].IsMythical == true) PurchaseConfirmation(priceM, menuChoice);
+                    else PurchaseConfirmation(priceC, menuChoice);
                     break;
                 case "d":
                     MainMenuManager.MainMenu();
@@ -234,12 +244,12 @@ namespace ZooManagementSystem
             Console.Clear();
             if (Program.UserMoney >= price)
             {
-                int specialAnimalChance = Animal.rd.Next(10);
+                int specialAnimalChance = Animal.rd.Next(2);
                 int specialAnimalIndex = Animal.rd.Next(SpecialAnimal.specialAnimals.Count);
                 int exoticness = Convert.ToChar(userChoice) - 'a';
                 Animal purchasedAnimal = shopAnimals[exoticness];
 
-                if (specialAnimalChance == 1 && userChoice == "c")
+                if (specialAnimalChance == 1 && userChoice == "c" && SpecialAnimal.specialAnimals.Count > 0) //Checking if specialAnimals.Count > 0 prevents crashing once all the mythical animals have been bought
                 {
                     shopAnimals[exoticness] = SpecialAnimal.specialAnimals[specialAnimalIndex];
                     SpecialAnimal.specialAnimals.RemoveAt(specialAnimalIndex);
@@ -247,7 +257,7 @@ namespace ZooManagementSystem
                 else
                     shopAnimals[exoticness] = Animal.RandomAnimal(exoticness);
                 Program.UserMoney -= price;
-                Program.animals.Add(purchasedAnimal); //Adds the purchased animal to the list of the user's animals
+                Program.userAnimals.Add(purchasedAnimal);
                 Program.UpdateIncome();
                 Console.WriteLine($"You purchased {purchasedAnimal.Name} the {purchasedAnimal.Species} for ${price}!");
             }
@@ -283,7 +293,7 @@ namespace ZooManagementSystem
             switch (menuChoice)
             {
                 case "a":
-                    Program.animals.Add(firstAnimal);
+                    Program.userAnimals.Add(firstAnimal);
                     Program.UpdateIncome();
                     Console.WriteLine($"You purchased {firstAnimal.Name} the {firstAnimal.Species}! \nPress enter to go back to the main menu.");
                     Console.ReadLine();
@@ -327,7 +337,7 @@ namespace ZooManagementSystem
         {
             StringBuilder saveInfo = new StringBuilder(); //Must use StringBuilder because strings are immutable after initialized
             saveInfo.AppendLine(Program.UserMoney.ToString());
-            foreach (Animal animal in Program.animals)
+            foreach (Animal animal in Program.userAnimals)
                 saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income},{animal.IsMythical}");
             return saveInfo.ToString();
         }
@@ -362,9 +372,9 @@ namespace ZooManagementSystem
                     if (bool.TryParse(animalData[3], out bool isMythical))
                     {
                         if (isMythical)
-                            Program.animals.Add(new SpecialAnimal(animalData[0], animalData[1], income, true));
+                            Program.userAnimals.Add(new SpecialAnimal(animalData[0], animalData[1], income, true));
                         else
-                            Program.animals.Add(new Animal(animalData[0], animalData[1], income, false));
+                            Program.userAnimals.Add(new Animal(animalData[0], animalData[1], income, false));
                     }
                     else Console.WriteLine($"Invalid animal isMythical data on line {i + 1}. Skipping.");
                 }
@@ -393,21 +403,21 @@ namespace ZooManagementSystem
     }
     internal class Program
     {
-        internal static List<Animal> animals = new List<Animal>();
+        internal static List<Animal> userAnimals = new List<Animal>();
         internal static decimal UserMoney { get; set; }
         internal static decimal UserIncome { get; set; }
         internal static DateTime lastIncomeTime;
         internal static void Database()
         {
             Console.WriteLine("== Welcome to the Database! ==");
-            if (animals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
+            if (userAnimals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
             else
             {
-                for (int i = 0; i < animals.Count; i++)
+                for (int i = 0; i < userAnimals.Count; i++)
                 {
                     Console.Write($"{i + 1}. ");
-                    if (animals[i].IsMythical == true) animals[i].DisplayAnimal();
-                    else animals[i].DisplayAnimal();
+                    if (userAnimals[i].IsMythical == true) userAnimals[i].DisplayAnimal();
+                    else userAnimals[i].DisplayAnimal();
                     Console.WriteLine();
                 }
             } //If the user has animals, it displays their name, species, and income
@@ -432,20 +442,12 @@ namespace ZooManagementSystem
         }
         internal static void UpdateIncome() //Adds up the user's income per second, based off the sum of the user's animals' income stats
         {
-            UserIncome = animals.Sum(a => a.Income);
-        }
-        private static void InitializeShop()
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                ShopManager.shopAnimals[i] = Animal.RandomAnimal(i + 1);
-                //Adds animals with varying exoticness to an array. These are the first set of animals in the shop when the program is executed.
-            }
+            UserIncome = userAnimals.Sum(a => a.Income);
         }
         static void Main(string[] args)
         {
             LoadSaveManager.LoadSave();
-            InitializeShop();
+            ShopManager.InitializeShop();
             lastIncomeTime = DateTime.Now;
             MainMenuManager.MainMenu();
         }
