@@ -57,10 +57,9 @@ namespace ZooManagementSystem
     {
         private static List<Animal> animals = new List<Animal>();
         private static Animal[] shopAnimals = new Animal[3];
+        private static DateTime lastIncomeTime;
         public static decimal UserMoney { get; set; }
         public static decimal UserIncome { get; set; }
-
-        private static DateTime lastIncomeTime;
         private static void MainMenu()
         {
             Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
@@ -318,5 +317,7 @@ namespace ZooManagementSystem
     }
 }
 /*
- * Try to incorporate inheritance or recursion, as well as data security features (public/private access modifiers, properties, interfaces)
+ * Inheritance
+ * Recursion
+ * Abstraction/Interfaces
  */
