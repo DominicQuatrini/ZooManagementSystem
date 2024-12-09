@@ -8,16 +8,17 @@ namespace ZooManagementSystem
         public string Name { get; set; }
         public string Species { get; set; }
         public int Income { get; set; }
-        public int Type { get; set; }
+        public bool IsMythical { get; set; }
         public Animal()
         {
 
         }
-        public Animal(string name, string species, int income)
+        public Animal(string name, string species, int income, bool isMythical)
         {
             this.Name = name;
             this.Species = species;
             this.Income = income;
+            this.IsMythical = isMythical;
         }
         public virtual void DisplayAnimal()
         {
@@ -81,27 +82,27 @@ namespace ZooManagementSystem
             string rName = RandomName();
             string rSpecies = RandomSpecies();
             int rIncome = rd.Next(1, 7) * exoticness; //Gives a random value from 1 to 6            
-            return new Animal(rName, rSpecies, rIncome);
+            return new Animal(rName, rSpecies, rIncome, false);
         }
     }
     internal class SpecialAnimal : Animal
     {
         public static List<SpecialAnimal> specialAnimals = new List<SpecialAnimal>
         {
-            new SpecialAnimal("Asterion", "Minotaur", 20, 1),
-            new SpecialAnimal("Twilight Sparkle", "Unicorn", 20, 1),
-            new SpecialAnimal("Typhon", "Hydra", 20, 1),
-            new SpecialAnimal("Karkinos", "Leviathan", 20, 1),
-            new SpecialAnimal("Zenyatta", "Phoenix", 20, 1),
-            new SpecialAnimal("Spyro", "Dragon", 20, 1),
-            new SpecialAnimal("Mordecai", "Griffin", 20, 1)
+            new SpecialAnimal("Asterion", "Minotaur", 20, true),
+            new SpecialAnimal("Twilight Sparkle", "Unicorn", 20, true),
+            new SpecialAnimal("Typhon", "Hydra", 20, true),
+            new SpecialAnimal("Karkinos", "Leviathan", 20, true),
+            new SpecialAnimal("Zenyatta", "Phoenix", 20, true),
+            new SpecialAnimal("Spyro", "Dragon", 20, true),
+            new SpecialAnimal("Mordecai", "Griffin", 20, true)
         };
-        private SpecialAnimal(string name, string species, int income, int type)
+        public SpecialAnimal(string name, string species, int income, bool isMythical)
         {
             this.Name = name;
             this.Species = species;
             this.Income = income;
-            this.Type = type;
+            this.IsMythical = isMythical;
         }
         public override void DisplayAnimal()
         {
@@ -127,14 +128,14 @@ namespace ZooManagementSystem
             Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
             Console.Write($"\nCurrent Balance: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{UserMoney}");
+            Console.Write($"${UserMoney}");
             Console.ResetColor();
 
             Console.Write($"\nIncome: +");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($"${UserIncome}"); //Prints current user money and income
             Console.ResetColor();
-            Console.WriteLine(" per second");
+            Console.WriteLine("/s");
 
             string menuChoice = Console.ReadLine().ToLower();
             while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c" && menuChoice != "d")
@@ -171,7 +172,7 @@ namespace ZooManagementSystem
                 for (int i = 0; i < animals.Count; i++)
                 {
                     Console.Write($"{i + 1}. ");
-                    if (animals[i] is SpecialAnimal specialAnimal) specialAnimal.DisplayAnimal();
+                    if (animals[i].IsMythical == true) animals[i].DisplayAnimal();
                     else animals[i].DisplayAnimal();
                     Console.WriteLine();
                 }
@@ -264,7 +265,7 @@ namespace ZooManagementSystem
         }
         private static void FreeShop()
         {
-            Animal firstAnimal = new Animal("Rainier", "Rhino", 3);
+            Animal firstAnimal = new Animal("Rainier", "Rhino", 3, false);
             Console.WriteLine($"== Welcome to the shop! ==" +
                 $"\na) {firstAnimal.Name} the {firstAnimal.Species}, FREE" +
                 $"\nb) Back to main menu");
@@ -319,7 +320,7 @@ namespace ZooManagementSystem
             saveInfo.AppendLine(UserMoney.ToString());
             foreach (Animal animal in animals)
             {
-                saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income}");
+                saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income},{animal.IsMythical}");
             } //The first line of saveInfo is the user's money, every line after that is animal data
             return saveInfo.ToString();
         }
@@ -342,9 +343,12 @@ namespace ZooManagementSystem
                     for (int i = 1; i < lines.Length; i++)
                     {
                         string[] animalData = lines[i].Split(',');
-                        if (animalData.Length == 3 && int.TryParse(animalData[2], out int income))
-                        { //If the line from save.txt contains the properly formatted animal data, the animal is reconstructed
-                            animals.Add(new Animal(animalData[0], animalData[1], income));
+                        if (animalData.Length == 4 && int.TryParse(animalData[2], out int income))
+                        {
+                            if (animalData[3] == "True")
+                                animals.Add(new SpecialAnimal(animalData[0], animalData[1], income, true));
+                            else
+                                animals.Add(new Animal(animalData[0], animalData[1], income, false));
                         }
                         else Console.WriteLine($"Invalid animal data on line {i + 1}. Skipping.");
                     }
@@ -389,7 +393,6 @@ namespace ZooManagementSystem
     }
 }
 /*
- * Inheritance
  * Recursion
  * Abstraction/Interfaces
  */
