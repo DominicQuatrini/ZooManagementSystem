@@ -4,19 +4,24 @@ namespace ZooManagementSystem
 {
     internal class Animal
     {
-        private static Random rd = new Random();
+        public static Random rd = new Random();
         public string Name { get; set; }
         public string Species { get; set; }
         public int Income { get; set; }
+        public int Type { get; set; }
+        public Animal()
+        {
+
+        }
         public Animal(string name, string species, int income)
         {
             this.Name = name;
             this.Species = species;
             this.Income = income;
         }
-        public void DisplayAnimal()
+        public virtual void DisplayAnimal()
         {
-            Console.WriteLine($"{Name} the {Species}, $/s: {Income}");
+            Console.Write($"{Name} the {Species}, ${Income}/s");
         }
         private static string RandomName()
         { //names are from https://www.ssa.gov/oact/babynames/decades/century.html
@@ -30,14 +35,40 @@ namespace ZooManagementSystem
         }
         private enum SpeciesOptions
         {
-            Elephant,
-            Rhino,
-            Hippo,
-            Giraffe,
-            Cheetah,
-            Bear,
+            Cobra,
             Eagle,
-            Whale
+            Horse,
+            Bull,
+            Alligator,
+            Penguin,
+            Bear,
+            Whale,
+            Goat,
+            Deer,
+            Boar,
+            Rabbit,
+            Beaver,
+            Otter,
+            Tiger,
+            Lion,
+            Hippo,
+            Seal,
+            Dolphin,
+            Orca,
+            Gazelle,
+            Shark,
+            Tarantula,
+            Mosquito,
+            Beetle,
+            Scorpion,
+            Meerkat,
+            Fox,
+            Jellyfish,
+            Octopus,
+            Leopard,
+            Wolf,
+            Monkey,
+            Turtle
         }
         private static string RandomSpecies()
         {
@@ -51,6 +82,37 @@ namespace ZooManagementSystem
             string rSpecies = RandomSpecies();
             int rIncome = rd.Next(1, 7) * exoticness; //Gives a random value from 1 to 6            
             return new Animal(rName, rSpecies, rIncome);
+        }
+    }
+    internal class SpecialAnimal : Animal
+    {
+        public static List<SpecialAnimal> specialAnimals = new List<SpecialAnimal>
+        {
+            new SpecialAnimal("Asterion", "Minotaur", 20, 1),
+            new SpecialAnimal("Twilight Sparkle", "Unicorn", 20, 1),
+            new SpecialAnimal("Typhon", "Hydra", 20, 1),
+            new SpecialAnimal("Karkinos", "Leviathan", 20, 1),
+            new SpecialAnimal("Zenyatta", "Phoenix", 20, 1),
+            new SpecialAnimal("Spyro", "Dragon", 20, 1),
+            new SpecialAnimal("Mordecai", "Griffin", 20, 1)
+        };
+        private SpecialAnimal(string name, string species, int income, int type)
+        {
+            this.Name = name;
+            this.Species = species;
+            this.Income = income;
+            this.Type = type;
+        }
+        public override void DisplayAnimal()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.Write($"The Great {Species}");
+            Console.ResetColor();
+            Console.Write(", ");
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.Write($"{Name}");
+            Console.ResetColor();
+            Console.Write($", ${Income}/s");
         }
     }
     internal class Program
@@ -103,14 +165,15 @@ namespace ZooManagementSystem
         private static void Database()
         {
             Console.WriteLine("== Welcome to the Database! ==");
-            if (animals.Count == 0)
-                Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
+            if (animals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
             else
             {
                 for (int i = 0; i < animals.Count; i++)
                 {
                     Console.Write($"{i + 1}. ");
-                    animals[i].DisplayAnimal();
+                    if (animals[i] is SpecialAnimal specialAnimal) specialAnimal.DisplayAnimal();
+                    else animals[i].DisplayAnimal();
+                    Console.WriteLine();
                 }
             } //If the user has animals, it displays their name, species, and income
             Console.WriteLine("\nPress enter to return to the main menu.");
@@ -132,7 +195,9 @@ namespace ZooManagementSystem
             int basePrice = 0;
             for (int i = 0; i < shopAnimals.Length; i++)
             {
-                Console.WriteLine($"{(char)('a' + i)}) {shopAnimals[i].Name} the {shopAnimals[i].Species}, ${basePrice + 50*(i + 1)}");
+                Console.Write($"{(char)('a' + i)}) ");
+                shopAnimals[i].DisplayAnimal();
+                Console.WriteLine($", ${basePrice + 50*(i + 1)}");
                 basePrice += 50;
             }
             Console.WriteLine($"d) Back to main menu");
@@ -164,6 +229,8 @@ namespace ZooManagementSystem
         {
             if (UserMoney >= price)
             {
+                int specialAnimalChance = Animal.rd.Next(2);
+                int specialAnimalIndex = Animal.rd.Next(SpecialAnimal.specialAnimals.Count);
                 Animal purchasedAnimal;
                 if (userChoice == "a")
                 {
@@ -178,7 +245,12 @@ namespace ZooManagementSystem
                 else
                 {
                     purchasedAnimal = shopAnimals[2];
-                    shopAnimals[2] = Animal.RandomAnimal(3);
+                    if(specialAnimalChance == 1)
+                    { //If the user purchases all of the special animals, the game bugs out and crashes.
+                        shopAnimals[2] = SpecialAnimal.specialAnimals[specialAnimalIndex];
+                        SpecialAnimal.specialAnimals.RemoveAt(specialAnimalIndex);
+                    }
+                    else shopAnimals[2] = Animal.RandomAnimal(3);
                 }
                 UserMoney -= price;
                 animals.Add(purchasedAnimal); //Adds the purchased animal to the list of the user's animals
