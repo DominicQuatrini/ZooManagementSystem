@@ -56,18 +56,26 @@ namespace ZooManagementSystem
     class Program
     {
         static List<Animal> animals = new List<Animal>();
-        static Stack<Animal> shopAnimals = new Stack<Animal>();
-        static HashSet<Animal> uniqueAnimals = new HashSet<Animal>();
+        static Animal[] shopAnimals = new Animal[3];
         static decimal userMoney = 0;
         static decimal userIncome = 0;
-        static System.Timers.Timer timer1;
+        static DateTime lastIncomeTime;
         static void MainMenu()
         {
-            Console.WriteLine("Welcome to the Zoo Management System! Please choose an option. \na) Animal Database \nb) Shop \nc) Save and Exit");
-            Console.WriteLine($"Current Money: ${userMoney:F2} \nIncome per second: ${userIncome:F2}"); //prints current user money and income
+            Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
+            Console.Write($"\nCurrent Balance: ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"{userMoney}");
+            Console.ResetColor();
+
+            Console.Write($"\nIncome: +");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"${userIncome}"); //Prints current user money and income
+            Console.ResetColor();
+            Console.WriteLine(" per second");
 
             string menuChoice = Console.ReadLine().ToLower();
-            while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c")
+            while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c" && menuChoice != "d")
             {
                 Console.Write("Please input one of the options listed above.");
                 menuChoice = Console.ReadLine().ToLower();
@@ -80,9 +88,12 @@ namespace ZooManagementSystem
                     break;
                 case "b":
                     if(animals.Count == 0) FreeShop();
-                    else Shop();
+                    else Shop(); //If the user doesn't have any animals, a different shop menu will be opened
                     break;
                 case "c":
+                    CollectMoney();
+                    break;
+                case "d":
                     SaveExit();
                     break;
                 default:
@@ -102,7 +113,7 @@ namespace ZooManagementSystem
                     animals[i].DisplayAnimal();
                 }
             } //If the user has animals, it displays their name, species, and income
-            Console.WriteLine("Press enter to return to the main menu.");
+            Console.WriteLine("\nPress enter to return to the main menu.");
             Console.ReadLine();
             Console.Clear();
             MainMenu(); //Once the user hits the enter key, they are sent back to the main menu 
@@ -111,19 +122,20 @@ namespace ZooManagementSystem
         {
             for (int i = 0; i < 3; i++)
             {
-                shopAnimals.Push(Animal.RandomAnimal(3 - i));
-                //Puts the animal with exoticness 3 at the bottom of the stack, exoticness 2 in the middle, and exoticness 1 at the top
+                shopAnimals[i] = Animal.RandomAnimal(i + 1);
+                //Adds animals with varying exoticness to an array
             }
         }
         static void Shop()
         {
-            Animal[] currentAnimals = shopAnimals.ToArray();
-            //Converts the stack shopAnimals into an array --> [0] = exoticness 3, [1] = exoticness 2, [2] = exoticness 1
-            Console.WriteLine($"== Welcome to the shop! ==" + 
-                              $"\na) {currentAnimals[2].name} the {currentAnimals[2].species}, $50" +
-                              $"\nb) {currentAnimals[1].name} the {currentAnimals[1].species}, $150" +
-                              $"\nc) {currentAnimals[0].name} the {currentAnimals[0].species}, $250" +
-                              $"\nd) Back to main menu");
+            Console.WriteLine($"== Welcome to the shop! ==");
+            int basePrice = 0;
+            for (int i = 0; i < shopAnimals.Length; i++)
+            {
+                Console.WriteLine($"{(char)('a' + i)}) {shopAnimals[i].name} the {shopAnimals[i].species}, ${basePrice + 50*(i + 1)}");
+                basePrice += 50;
+            }
+            Console.WriteLine($"d) Back to main menu");
             string menuChoice = Console.ReadLine().ToLower();
             while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c" && menuChoice != "d")
             {
@@ -134,19 +146,49 @@ namespace ZooManagementSystem
             switch (menuChoice)
             {
                 case "a":
-                    PurchaseConfirmation(50);
+                    PurchaseConfirmation(50, menuChoice);
                     break;
                 case "b":
-                    PurchaseConfirmation(150);
+                    PurchaseConfirmation(150, menuChoice);
                     break;
                 case "c":
-                    PurchaseConfirmation(250);
+                    PurchaseConfirmation(250, menuChoice);
                     break;
                 case "d":
                     MainMenu();
                     break;
                 default: break;
             }
+        }
+        static void PurchaseConfirmation(int price, string userChoice)
+        {
+            if (userMoney >= price)
+            {
+                Animal purchasedAnimal;
+                if (userChoice == "a")
+                {
+                    purchasedAnimal = shopAnimals[0];
+                    shopAnimals[0] = Animal.RandomAnimal(1); //Replaces the purchased animal with a new random animal with matching exoticness
+                }
+                else if (userChoice == "b")
+                {
+                    purchasedAnimal = shopAnimals[1];
+                    shopAnimals[1] = Animal.RandomAnimal(2);
+                }
+                else
+                {
+                    purchasedAnimal = shopAnimals[2];
+                    shopAnimals[2] = Animal.RandomAnimal(3);
+                }
+                userMoney -= price;
+                animals.Add(purchasedAnimal); //Adds the purchased animal to the list of the user's animals
+                UpdateIncome();
+                Console.WriteLine($"You purchased {purchasedAnimal.name} the {purchasedAnimal.species} for ${price}!");
+            }
+            else Console.WriteLine("Not enough money to purchase this animal.");
+            Console.ReadLine();
+            Console.Clear();
+            Shop();
         }
         static void FreeShop()
         {
@@ -177,69 +219,33 @@ namespace ZooManagementSystem
                 default: break;
             }
         }
-        static void PurchaseConfirmation(int price)
-        {
-            if (userMoney >= price)
-            {
-                Animal purchasedAnimal = shopAnimals.Pop(); //Removes the purchased animal from the shop selection
-                animals.Add(purchasedAnimal); //Adds the purchased animal to the list of the user's animals
-                userMoney -= price;
-                UpdateIncome();
-                Console.WriteLine($"You purchased {purchasedAnimal.name} the {purchasedAnimal.species} for ${price}!");
-                ShopRestock();
-            }
-            else
-            {
-                Console.WriteLine("Not enough money to purchase this animal.");
-            }
-            Console.ReadLine();
-            Console.Clear();
-            MainMenu();
-        }
-        static void ShopRestock()
-        { //Once an animal is purchased, a new, randomized one takes its place in the shop.
-            while (shopAnimals.Count < 3)
-            {
-                shopAnimals.Push(Animal.RandomAnimal(3 - shopAnimals.Count));
-            } //The new animal's exoticness is based off of how many animals are currently in the shop
-        }
         static void UpdateIncome()
         { //Adds up all of the income from the user's animals, to be received per second. When called, updates the user's income to include newly purchased animals
             userIncome = animals.Sum(a => a.income);
-        }
-        static void EarnedIncome()
-        {
-            userMoney += userIncome;
-            Console.WriteLine($"You earned ${userIncome:F2} from your animals!");
         }
         static void SaveExit()
         {
             string saveInfo = SaveInfo();
             File.WriteAllText("save.txt", saveInfo); //Writes the returned value of saveInfo to a .txt file
-            DateTime period = DateTime.Now;
+            DateTime temp = DateTime.Now;
             int periodCount = 0;
             Console.Write("Saving");
             while (periodCount < 3)
             {
-                if ((DateTime.Now - period).TotalSeconds >= 0.5)
-                {
+                if ((DateTime.Now - temp).TotalSeconds >= 0.5)
+                { //Prints "Saving" -> "Saving ." -> "Saving . ." ->  "Saving . . ." with half-second intervals between updates
                     Console.Write(" .");
-                    period = DateTime.Now;
+                    temp = DateTime.Now;
                     periodCount++;
                 }
             }
-            Console.WriteLine("\nData successfully saved! \nPress enter to close window.");
-            Console.ReadLine();
-
+            Console.WriteLine("\nData successfully saved!");
         }
         static string SaveInfo()
         {
-            uniqueAnimals.Clear();
-            uniqueAnimals.UnionWith(animals); //Adds all user animals to uniqueAnimals hashset
-
             StringBuilder saveInfo = new StringBuilder();
             saveInfo.AppendLine(userMoney.ToString());
-            foreach (Animal animal in uniqueAnimals)
+            foreach (Animal animal in animals)
             {
                 saveInfo.AppendLine($"{animal.name},{animal.species},{animal.income}");
             } //The first line of saveInfo is the user's money, every line after that is animal data
@@ -258,7 +264,7 @@ namespace ZooManagementSystem
                     }
                     else
                     {
-                        Console.WriteLine("Invalid format in save file. Resetting user money to 0.");
+                        Console.WriteLine("Invalid format in save file. Resetting user money to 0.\n");
                         userMoney = 0;
                     } 
                     for (int i = 1; i < lines.Length; i++)
@@ -271,49 +277,47 @@ namespace ZooManagementSystem
                         else Console.WriteLine($"Invalid animal data on line {i + 1}. Skipping.");
                     }
                     UpdateIncome(); //Updates user income based on loaded animals
-                    Console.WriteLine("Save data loaded successfully.");
+                    Console.WriteLine("Save data loaded.\n");
                 }
                 else
                 {
-                    Console.WriteLine("Save file is empty. Starting fresh.");
+                    Console.WriteLine("Save file is empty. Starting fresh.\n");
                     userMoney = 0;
                 }
             }
             else
             {
-                Console.WriteLine("No save file found. Starting fresh.");
+                Console.WriteLine("No save file found. Starting fresh.\n");
                 userMoney = 0;
             }
+        }
+        static void CollectMoney()
+        {
+            int secondsElapsed = (int)Math.Round((DateTime.Now - lastIncomeTime).TotalSeconds);
+            userMoney += userIncome * secondsElapsed;
+            Console.Write($"You earned ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"${userIncome * secondsElapsed} ");
+            Console.ResetColor();
+            Console.WriteLine($"from your animals!");
+            lastIncomeTime = DateTime.Now;
+
+            Console.WriteLine("\nPress enter to return to the main menu.");
+            Console.ReadLine();
+            Console.Clear();
+            MainMenu();
         }
         static void Main(string[] args)
         {
             LoadSave();
             InitializeShop();
-            DateTime lastIncomeTime = DateTime.Now;
-            while (true)
-            {
-                if ((DateTime.Now - lastIncomeTime).TotalSeconds >= 1)
-                { //Timed income system. Every second, the user receives money based on their animals
-                    EarnedIncome();
-                    lastIncomeTime = DateTime.Now;
-                }
-                Console.WriteLine();
-                MainMenu();
-                //System.Threading.Thread.Sleep(100);
-                //if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
-                //{
-                //    SaveExit();
-                //    break;
-                //}
-            }
+            lastIncomeTime = DateTime.Now;
+            MainMenu();
         }
     }
 }
 
 /*
- * Fix passive income system using a separate thread. Currently, income only updates when SaveExit() is called.
- * Fix SaveExit function and include "Saving . . ." animation using timers (Saving -> Saving . -> Saving . . -> Saving . . .), then end automatically close console window after animation.
- * Fix shop. The animal that is purchased is not the same one as the one that is displayed. I think the stack is reversed. Also, most expensive animals should give the most income
  * Animal naming .txt file
  * Try to incorporate inheritance or recursion, as well as data security features (public/private access modifiers, properties, interfaces)
  */
