@@ -182,18 +182,22 @@ namespace ZooManagementSystem
     internal class ShopManager
     {
         internal static Animal[] shopAnimals = new Animal[3];
-        private static void DisplayShop()
+        static int basePrice = 50; //Sets the price for shopAnimals[0] to $50, as well as affecting the calculations for other shop offers
+        static int mythicalFactor = 20; //Makes it easy to change mythical price (price * mythicalFactor)
+        static int regularFactor = 5; //Makes it easy to change regular price (price * regularFactor * i)
+        private static void DisplayShopOffers(int i) //Prints each shop offer. Only one shop offer prints each time DisplayShopOffers(int i) is called
         {
-            Console.WriteLine($"== Welcome to the shop! ==");
-            int basePrice = 0;
-            for (int i = 0; i < shopAnimals.Length; i++)
-            { // RECURSION OPPPORTUNITY ---------------------------------------------------------------
-                Console.Write($"{(char)('a' + i)}) ");
-                shopAnimals[i].DisplayAnimal();
-                Console.WriteLine($", ${basePrice + 50 * (i + 1)}");
-                basePrice += 50;
-            }
-            Console.WriteLine($"d) Back to main menu");
+            if (i >= shopAnimals.Length) return; //Stops the recursion if i is out of bounds for shopAnimals[i]
+
+            Console.Write($"{(char)('a' + i)}) ");
+            shopAnimals[i].DisplayAnimal();
+
+            if (shopAnimals[i].IsMythical == true) Console.WriteLine($", ${basePrice * mythicalFactor}");
+            else if (i == 0) Console.WriteLine($", ${basePrice}");
+            else Console.WriteLine($", ${basePrice * regularFactor * i}");
+            //Prints the corresponding price
+
+            DisplayShopOffers(i + 1);
         }
         private static string GetShopChoice()
         {
@@ -205,18 +209,19 @@ namespace ZooManagementSystem
             }
             return menuChoice;
         }
-        private static void HandleShopChoice(int price, string menuChoice)
+        private static void HandleShopChoice(string menuChoice)
         {
             switch (menuChoice)
             {
                 case "a":
-                    PurchaseConfirmation(price, menuChoice);
+                    PurchaseConfirmation(basePrice, menuChoice);
                     break;
                 case "b":
-                    PurchaseConfirmation(price * 5, menuChoice);
+                    PurchaseConfirmation(basePrice * regularFactor, menuChoice);
                     break;
                 case "c":
-                    PurchaseConfirmation(price * 10, menuChoice);
+                    if (shopAnimals[2].IsMythical == true) PurchaseConfirmation(basePrice * mythicalFactor, menuChoice);
+                    else PurchaseConfirmation(basePrice * 2 * regularFactor, menuChoice);
                     break;
                 case "d":
                     MainMenuManager.MainMenu();
@@ -253,9 +258,11 @@ namespace ZooManagementSystem
         }
         internal static void Shop()
         {
-            DisplayShop();
+            Console.WriteLine($"== Welcome to the shop! ==");
+            DisplayShopOffers(0);
+            Console.WriteLine($"d) Back to main menu");
             string menuChoice = GetShopChoice();
-            HandleShopChoice(price, menuChoice);
+            HandleShopChoice(menuChoice);
         }
     }
     internal class FreeShopManager
