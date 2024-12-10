@@ -2,130 +2,6 @@
 
 namespace ZooManagementSystem
 {
-    internal class Animal
-    {
-        internal static Random rd = new Random();
-        internal string Name { get; set; }
-        internal string Species { get; set; }
-        internal int Income { get; set; }
-        internal bool IsMythical { get; set; }
-        internal Animal() //Default constructor is required for class SpecialAnimal to inherit from class Animal
-        {
-
-        }
-        internal Animal(string name, string species, int income, bool isMythical)
-        {
-            this.Name = name;
-            this.Species = species;
-            this.Income = income;
-            this.IsMythical = isMythical;
-        }
-        internal virtual void DisplayAnimal()
-        {
-            Console.Write($"{Name} the {Species}, ${Income}/s");
-        }
-        private static string RandomName() //Generates a random name from a names.txt
-        { //names are from https://www.ssa.gov/oact/babynames/decades/century.html
-            if (File.Exists("names.txt"))
-            {
-                string[] lines = File.ReadAllLines("names.txt");
-                int n = rd.Next(lines.Length);
-                return lines[n];
-            }
-            else return "placeholder";
-        }
-        private enum SpeciesOptions
-        {
-            Cobra,
-            Eagle,
-            Horse,
-            Bull,
-            Alligator,
-            Penguin,
-            Bear,
-            Whale,
-            Goat,
-            Deer,
-            Boar,
-            Rabbit,
-            Beaver,
-            Otter,
-            Tiger,
-            Lion,
-            Hippo,
-            Seal,
-            Dolphin,
-            Orca,
-            Gazelle,
-            Shark,
-            Tarantula,
-            Mosquito,
-            Beetle,
-            Scorpion,
-            Meerkat,
-            Fox,
-            Jellyfish,
-            Octopus,
-            Leopard,
-            Wolf,
-            Monkey,
-            Turtle
-        }
-        private static string RandomSpecies()
-        {
-            string[] species = Enum.GetNames(typeof(SpeciesOptions));
-            int n = rd.Next(species.Length);
-            return species[n];
-        } //Generates a random species from enum SpeciesOptions
-        private static int RandomIncome(int exoticness) //Generates a random income. int exoticness dictates the animal's minimum and maximum possible income
-        {
-            if (exoticness == 0)
-                return rd.Next(1, 6);
-            else if (exoticness == 1)
-                return rd.Next(6, 11);
-            else
-                return rd.Next(11, 16);
-        }
-        internal static Animal RandomAnimal(int exoticness) //Generates an animal object using the aforementioned randomized methods. 
-        {
-            string randomName = RandomName();
-            string randomSpecies = RandomSpecies();
-            int randomIncome = RandomIncome(exoticness);
-            
-            return new Animal(randomName, randomSpecies, randomIncome, false);
-        }
-    }
-    internal class SpecialAnimal : Animal
-    {
-        internal static List<SpecialAnimal> specialAnimals = new List<SpecialAnimal>
-        {
-            new SpecialAnimal("Asterion", "Minotaur", 20, true),
-            new SpecialAnimal("Twilight Sparkle", "Unicorn", 20, true),
-            new SpecialAnimal("Typhon", "Hydra", 20, true),
-            new SpecialAnimal("Karkinos", "Leviathan", 20, true),
-            new SpecialAnimal("Zenyatta", "Phoenix", 20, true),
-            new SpecialAnimal("Spyro", "Dragon", 20, true),
-            new SpecialAnimal("Mordecai", "Griffin", 20, true)
-        }; //List of mythical animals with preset fields
-        internal SpecialAnimal(string name, string species, int income, bool isMythical)
-        {
-            this.Name = name;
-            this.Species = species;
-            this.Income = income;
-            this.IsMythical = isMythical;
-        }
-        internal override void DisplayAnimal() //Overrides Animal.DisplayAnimal() to allow different formatting and font color
-        {
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.Write($"The Great {Species}");
-            Console.ResetColor();
-            Console.Write(", ");
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.Write($"{Name}");
-            Console.ResetColor();
-            Console.Write($", ${Income}/s");
-        }
-    }
     internal class MainMenuManager
     {
         private static void DisplayMainMenu() //Prints welcome messages, menu options, user income, and user balance
@@ -141,16 +17,6 @@ namespace ZooManagementSystem
             Console.Write($"${Program.UserIncome}");
             Console.ResetColor();
             Console.WriteLine("/s");
-        }
-        private static string GetMainMenuChoice() //Gets user input for menu option
-        {
-            string menuChoice = Console.ReadLine().ToLower();
-            while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c" && menuChoice != "d")
-            {
-                Console.Write("Please input one of the options listed above.");
-                menuChoice = Console.ReadLine().ToLower();
-            }
-            return menuChoice;
         }
         private static void HandleMainMenuChoice(string menuChoice) //Calls the corresponding method based on the user's input
         {
@@ -177,7 +43,7 @@ namespace ZooManagementSystem
         {
             Console.Clear();
             DisplayMainMenu();
-            string menuChoice = GetMainMenuChoice();
+            string menuChoice = Program.GetUserChoice(4);
             Console.Clear();
             HandleMainMenuChoice(menuChoice);
         }
@@ -206,16 +72,6 @@ namespace ZooManagementSystem
             else Console.WriteLine($", ${priceC}");
 
             DisplayShopOffers(i + 1); //Recursion to loop printing the shop offers
-        }
-        private static string GetShopChoice() 
-        {
-            string menuChoice = Console.ReadLine().ToLower();
-            while (menuChoice != "a" && menuChoice != "b" && menuChoice != "c" && menuChoice != "d")
-            {
-                Console.Write("Please input one of the options listed above.");
-                menuChoice = Console.ReadLine().ToLower();
-            }
-            return menuChoice;
         }
         private static void HandleShopChoice(string menuChoice)
         {
@@ -269,23 +125,13 @@ namespace ZooManagementSystem
             Console.WriteLine($"== Welcome to the shop! ==");
             DisplayShopOffers(0);
             Console.WriteLine($"d) Back to main menu");
-            string menuChoice = GetShopChoice();
+            string menuChoice = Program.GetUserChoice(4);
             HandleShopChoice(menuChoice);
         }
     }
     internal class FreeShopManager
     {
         internal static Animal firstAnimal = new Animal("Rainier", "Rhino", 3, false);
-        private static string GetFreeShopChoice()
-        {
-            string menuChoice = Console.ReadLine().ToLower();
-            while (menuChoice != "a" && menuChoice != "b")
-            {
-                Console.Write("Please input one of the options listed above.");
-                menuChoice = Console.ReadLine().ToLower();
-            }
-            return menuChoice;
-        }
         private static void HandleFreeShopChoice(string menuChoice)
         {
             switch (menuChoice)
@@ -310,93 +156,8 @@ namespace ZooManagementSystem
                 $"\na) {firstAnimal.Name} the {firstAnimal.Species}, FREE" +
                 $"\nb) Back to main menu");
 
-            string menuChoice = GetFreeShopChoice();
+            string menuChoice = Program.GetUserChoice(2);
             HandleFreeShopChoice(menuChoice);
-        }
-    }
-    internal class SaveManager
-    {
-        private static void ExitAnimation() //Prints "Saving" -> "Saving ." -> "Saving . ." ->  "Saving . . ." with intervals between each update
-        {
-            DateTime temp = DateTime.Now;
-            double delay = 0.75; //Change this value to change the interval between each update
-            int periodCount = 0;
-            while (periodCount < 3)
-            {
-                if ((DateTime.Now - temp).TotalSeconds >= delay)
-                {
-                    Console.Write(" .");
-                    temp = DateTime.Now;
-                    periodCount++;
-                }
-            }
-        }
-        private static string SaveInfo() //Returns userMoney and user's animal data as one string
-        {
-            StringBuilder saveInfo = new StringBuilder(); //Must use StringBuilder because strings are immutable after initialized
-            saveInfo.AppendLine(Program.UserMoney.ToString());
-            foreach (Animal animal in Program.userAnimals)
-                saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income},{animal.IsMythical}");
-            return saveInfo.ToString();
-        }
-        internal static void Save() //Saves the user's game data to save.txt
-        {
-            string saveInfo = SaveInfo();
-            File.WriteAllText("save.txt", saveInfo);
-            Console.Write("Saving");
-            ExitAnimation();
-            Console.WriteLine("\nData successfully saved!");
-        }
-    }
-    internal class LoadSaveManager
-    {
-        private static void LoadMoney(string[] lines) //Loads the first line of save.txt as userMoney. If improperly formatted, userMoney will instead be set to 0
-        {
-            if (decimal.TryParse(lines[0], out decimal money))
-                Program.UserMoney = money;
-            else
-            {
-                Console.WriteLine("Invalid format in save file. Resetting user money to 0.\n");
-                Program.UserMoney = 0;
-            }
-        }
-        private static void LoadAnimals(string[] lines) //Reconstructs animals from animal data. If data is improperly formatted, an error message is displayed and reconstruction is skipped
-        {
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] animalData = lines[i].Split(',');
-                if (animalData.Length == 4 && int.TryParse(animalData[2], out int income))
-                {
-                    if (bool.TryParse(animalData[3], out bool isMythical))
-                    {
-                        if (isMythical)
-                            Program.userAnimals.Add(new SpecialAnimal(animalData[0], animalData[1], income, true));
-                        else
-                            Program.userAnimals.Add(new Animal(animalData[0], animalData[1], income, false));
-                    }
-                    else Console.WriteLine($"Invalid animal isMythical data on line {i + 1}. Skipping.");
-                }
-                else Console.WriteLine($"Invalid animal income data on line {i + 1}. Skipping.");
-            }
-        }
-        internal static void LoadSave() //Reads save.txt, reconstructs animals from animal data
-        {
-            if (File.Exists("save.txt"))
-            {
-                string[] lines = File.ReadAllLines("save.txt");
-                if (lines.Length > 0)
-                {
-                    LoadMoney(lines);
-                    LoadAnimals(lines);
-                    Program.UpdateIncome();
-                    Console.WriteLine("Save data loaded. Press enter to continue.");
-                    Console.ReadLine();
-                    return;
-                }
-            }
-            Console.WriteLine("Save file is empty or could not be found. Press enter to continue.");
-            Program.UserMoney = 0;
-            Console.ReadLine();
         }
     }
     internal class Program
@@ -442,6 +203,21 @@ namespace ZooManagementSystem
         {
             UserIncome = userAnimals.Sum(a => a.Income);
         }
+        internal static string GetUserChoice(int numberOfOptions)
+        {
+            string userChoice = Console.ReadLine().ToLower();
+            char temp = Convert.ToChar(userChoice);
+            List<char> choices = new List<char>();
+
+            for (int i = 0; i < numberOfOptions; i++) choices.Add((char)('a' + i));
+            while(choices.Contains(temp) == false)
+            {
+                Console.WriteLine("Please enter an option above.");
+                userChoice = Console.ReadLine().ToLower();
+                temp = Convert.ToChar(userChoice);
+            }
+            return userChoice;
+        }
         static void Main(string[] args)
         {
             LoadSaveManager.LoadSave();
@@ -453,7 +229,6 @@ namespace ZooManagementSystem
 }
 /*
  * Abstraction/Interfaces
- * Combine GetShopChoice(), GetFreeShopChoice(), GetMainMenuChoice() methods into one, with a parameter numberOfOptions, to reduce reduncancy
  * Break up PurchaseConfirmation() into multiple methods, each with only a single objective
  * Include mythical data in save.txt, so that the user may only purchase 1 of each mythical. Currently, the mythical array resets to normal after the user reopens the program, meaning users can get more than 7 mythicals
  */
