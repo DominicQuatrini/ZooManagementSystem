@@ -28,8 +28,8 @@ namespace ZooManagementSystem
         {
             Console.Write($"{Name} the {Species}, ${Income}/s");
         }
-        private static string RandomName() //Generates a random name from a names.txt
-        { //names are from https://www.ssa.gov/oact/babynames/decades/century.html
+        private static string RandomName()
+        {
             if (File.Exists("names.txt"))
             {
                 string[] lines = File.ReadAllLines("names.txt");
@@ -37,8 +37,8 @@ namespace ZooManagementSystem
                 return lines[n];
             }
             else return "placeholder";
-        }
-        private enum SpeciesOptions
+        } //names are from https://www.ssa.gov/oact/babynames/decades/century.html
+        private enum SpeciesOptions //Using an enum makes it easy to generate a random species since each index in the enum corresponds to a number. Also, this list of species will not change while the program is running
         {
             Cobra,
             Eagle,
@@ -80,8 +80,8 @@ namespace ZooManagementSystem
             string[] species = Enum.GetNames(typeof(SpeciesOptions));
             int n = rd.Next(species.Length);
             return species[n];
-        } //Generates a random species from enum SpeciesOptions
-        private static int RandomIncome(int exoticness) //Generates a random income. int exoticness dictates the animal's minimum and maximum possible income
+        }
+        private static int RandomIncome(int exoticness)
         {
             if (exoticness == 0)
                 return rd.Next(1, 6);
@@ -90,7 +90,7 @@ namespace ZooManagementSystem
             else
                 return rd.Next(11, 16);
         }
-        internal static Animal RandomAnimal(int exoticness) //Generates an animal object using the aforementioned randomized methods. 
+        internal static Animal RandomAnimal(int exoticness) 
         {
             string randomName = RandomName();
             string randomSpecies = RandomSpecies();
@@ -110,7 +110,7 @@ namespace ZooManagementSystem
             new SpecialAnimal("Zenyatta", "Phoenix", 20, true),
             new SpecialAnimal("Spyro", "Dragon", 20, true),
             new SpecialAnimal("Mordecai", "Griffin", 20, true)
-        }; //List of mythical animals with preset fields
+        }; //List of mythical animals with preset fields to allow for unique names, species, and incomes
         internal SpecialAnimal(string name, string species, int income, bool isMythical)
         {
             this.Name = name;

@@ -13,23 +13,23 @@ namespace ZooManagementSystem
         private static int factorB = 5; private static int priceB = priceA * factorB; //Declare price equations to prevent redundancy
         private static int factorC = 10; private static int priceC = priceA * factorC;
         private static int factorM = 20; private static int priceM = priceA * factorM;
-        internal static void InitializeShop() //Adds animals with varying exoticness (0, 1, and 2) to shopAnimals array. These are the first set of animals in the shop when the program is executed.
+        internal static void InitializeShop() //Creates the first set of animals in the shop when the program is executed.
         {
             for (int i = 0; i < 3; i++) shopAnimals[i] = Animal.RandomAnimal(i);
         }
-        private static void DisplayShopOffers(int i) //Prints each shop offer. Only one shop offer prints each time DisplayShopOffers(int i) is called
+        private static void DisplayShopOffers(int i) //Only one shop offer prints each time DisplayShopOffers(int i) is called to allow the use of recursion
         {
             if (i >= shopAnimals.Length) return; //Stops the recursion if i is out of bounds for shopAnimals[i]
 
-            Console.Write($"{(char)('a' + i)}) "); //Prints "a) ", "b) ", and "c) "
+            Console.Write($"{(char)('a' + i)}) ");
             shopAnimals[i].DisplayAnimal();
 
-            if (shopAnimals[i].IsMythical == true) Console.WriteLine($", ${priceM}"); //This loop displays the corresponding price to the shop offer
+            if (shopAnimals[i].IsMythical == true) Console.WriteLine($", ${priceM}");
             else if (i == 0) Console.WriteLine($", ${priceA}");
             else if (i == 1) Console.WriteLine($", ${priceB}");
             else Console.WriteLine($", ${priceC}");
 
-            DisplayShopOffers(i + 1); //Recursion to loop printing the shop offers
+            DisplayShopOffers(i + 1);
         }
         private static void HandleShopChoice(string menuChoice)
         {
@@ -51,7 +51,7 @@ namespace ZooManagementSystem
                 default: break;
             }
         }
-        private static void PurchaseConfirmation(int price, string userChoice) //Handles purchase interactions. Removes money from user's balance, adds purchased animal to user's animal. ALso restocks shop offers
+        private static void PurchaseConfirmation(int price, string userChoice)
         {
             Console.Clear();
             if (Program.UserMoney >= price)
@@ -87,7 +87,7 @@ namespace ZooManagementSystem
             HandleShopChoice(menuChoice);
         }
     }
-    internal class FreeShopManager
+    internal class FreeShopManager //Serves as an easy solution to the issue of the user not being able to do anything when first starting due to no animals and no money
     {
         internal static Animal firstAnimal = new Animal("Rainier", "Rhino", 3, false);
         private static void HandleFreeShopChoice(string menuChoice)
@@ -107,7 +107,7 @@ namespace ZooManagementSystem
                 default: break;
             }
         }
-        internal static void FreeShop() //Opens a shop with one free animal offer
+        internal static void FreeShop()
         {
 
             Console.WriteLine($"== Welcome to the shop! ==" +

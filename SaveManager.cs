@@ -11,7 +11,7 @@ namespace ZooManagementSystem
         private static void ExitAnimation() //Prints "Saving" -> "Saving ." -> "Saving . ." ->  "Saving . . ." with intervals between each update
         {
             DateTime temp = DateTime.Now;
-            double delay = 0.75; //Change this value to change the interval between each update
+            double delay = 0.75;
             int periodCount = 0;
             while (periodCount < 3)
             {
@@ -23,7 +23,7 @@ namespace ZooManagementSystem
                 }
             }
         }
-        private static string SaveInfo() //Returns userMoney and user's animal data as one string
+        private static string SaveInfo()
         {
             StringBuilder saveInfo = new StringBuilder(); //Must use StringBuilder because strings are immutable after initialized
             saveInfo.AppendLine(Program.UserMoney.ToString());
@@ -31,7 +31,7 @@ namespace ZooManagementSystem
                 saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income},{animal.IsMythical}");
             return saveInfo.ToString();
         }
-        internal static void Save() //Saves the user's game data to save.txt
+        internal static void Save()
         {
             string saveInfo = SaveInfo();
             File.WriteAllText("save.txt", saveInfo);
@@ -71,7 +71,7 @@ namespace ZooManagementSystem
                 else Console.WriteLine($"Invalid animal income data on line {i + 1}. Skipping.");
             }
         }
-        internal static void LoadSave() //Reads save.txt, reconstructs animals from animal data
+        internal static void LoadSave()
         {
             if (File.Exists("save.txt"))
             {

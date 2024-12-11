@@ -8,7 +8,7 @@ namespace ZooManagementSystem
 {
     internal class MainMenuManager
     {
-        private static void DisplayMainMenu() //Prints welcome messages, menu options, user income, and user balance
+        private static void DisplayMainMenu()
         {
             Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
             Console.Write($"\nCurrent Balance: ");

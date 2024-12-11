@@ -11,7 +11,7 @@ namespace ZooManagementSystem
         internal static void Database()
         {
             Console.WriteLine("== Welcome to the Database! ==");
-            if (userAnimals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop."); //If the list of animals is empty, the user is prompted to visit the shop.
+            if (userAnimals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop.");
             else
             {
                 for (int i = 0; i < userAnimals.Count; i++)
@@ -21,20 +21,22 @@ namespace ZooManagementSystem
                     else userAnimals[i].DisplayAnimal();
                     Console.WriteLine();
                 }
-            } //If the user has animals, it displays their name, species, and income
+            }
             Console.WriteLine("\nPress enter to return to the main menu.");
             Console.ReadLine();
-            MainMenuManager.MainMenu(); //Once the user hits the enter key, they are sent back to the main menu 
+            MainMenuManager.MainMenu();
         }
-        internal static void CollectMoney() //Calculates how much money the user's animals have earned, then adds it to the user's balance
+        internal static void CollectMoney()
         {
             int secondsElapsed = (int)Math.Round((DateTime.Now - lastIncomeTime).TotalSeconds);
             UserMoney += UserIncome * secondsElapsed;
+
             Console.Write($"You earned ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write($"${UserIncome * secondsElapsed} ");
             Console.ResetColor();
             Console.WriteLine($"from your animals!");
+
             lastIncomeTime = DateTime.Now;
 
             Console.WriteLine("\nPress enter to return to the main menu.");
