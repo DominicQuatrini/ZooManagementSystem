@@ -8,17 +8,18 @@ namespace ZooManagementSystem
 {
     internal class MainMenuManager
     {
+        internal static List<Animal> userAnimals = new List<Animal>();
         private static void DisplayMainMenu()
         {
             Console.WriteLine("== Welcome to the Zoo Management System! == \na) Animal Database \nb) Shop \nc) Collect money \nd) Save and Exit");
             Console.Write($"\nCurrent Balance: ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"${Program.UserMoney}");
+            Console.Write($"${ShopManager.UserMoney}");
             Console.ResetColor();
 
             Console.Write($"\nIncome: +");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"${Program.UserIncome}");
+            Console.Write($"${ShopManager.UserIncome}");
             Console.ResetColor();
             Console.WriteLine("/s");
         }
@@ -27,14 +28,14 @@ namespace ZooManagementSystem
             switch (menuChoice)
             {
                 case "a":
-                    Program.Database();
+                    Database();
                     break;
                 case "b":
-                    if (Program.userAnimals.Count == 0) FreeShopManager.FreeShop();
+                    if (userAnimals.Count == 0) FreeShopManager.FreeShop();
                     else ShopManager.Shop();
                     break;
                 case "c":
-                    Program.CollectMoney();
+                    ShopManager.CollectMoney();
                     break;
                 case "d":
                     SaveManager.Save();
@@ -42,6 +43,24 @@ namespace ZooManagementSystem
                 default:
                     break;
             }
+        }
+        private static void Database()
+        {
+            Console.WriteLine("== Welcome to the Database! ==");
+            if (userAnimals.Count == 0) Console.WriteLine("You don't own any animals. Visit the shop.");
+            else
+            {
+                for (int i = 0; i < userAnimals.Count; i++)
+                {
+                    Console.Write($"{i + 1}. ");
+                    if (userAnimals[i].IsMythical == true) userAnimals[i].DisplayAnimal();
+                    else userAnimals[i].DisplayAnimal();
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine("\nPress enter to return to the main menu.");
+            Console.ReadLine();
+            MainMenu();
         }
         internal static void MainMenu()
         {
@@ -53,3 +72,4 @@ namespace ZooManagementSystem
         }
     }
 }
+//BUG: When Database is ran multiple times in a row, fragments of it appear in the console

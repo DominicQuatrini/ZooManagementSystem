@@ -8,11 +8,36 @@ namespace ZooManagementSystem
 {
     internal class ShopManager
     {
-        internal static Animal[] shopAnimals = new Animal[3];
+        private static Animal[] shopAnimals = new Animal[3];
         private static int priceA = 50;
         private static int factorB = 5; private static int priceB = priceA * factorB; //Declare price equations to prevent redundancy
         private static int factorC = 10; private static int priceC = priceA * factorC;
         private static int factorM = 20; private static int priceM = priceA * factorM;
+
+        internal static decimal UserMoney { get; set; }
+        internal static decimal UserIncome { get; set; }
+        internal static DateTime lastIncomeTime;
+        internal static void CollectMoney()
+        {
+            int secondsElapsed = (int)Math.Round((DateTime.Now - lastIncomeTime).TotalSeconds);
+            UserMoney += UserIncome * secondsElapsed;
+
+            Console.Write($"You earned ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"${UserIncome * secondsElapsed} ");
+            Console.ResetColor();
+            Console.WriteLine($"from your animals!");
+
+            lastIncomeTime = DateTime.Now;
+
+            Console.WriteLine("\nPress enter to return to the main menu.");
+            Console.ReadLine();
+            MainMenuManager.MainMenu();
+        }
+        internal static void UpdateIncome() //Adds up the user's income per second, based off the sum of the user's animals' income stats
+        {
+            UserIncome = MainMenuManager.userAnimals.Sum(a => a.Income);
+        }
         internal static void InitializeShop() //Creates the first set of animals in the shop when the program is executed.
         {
             for (int i = 0; i < 3; i++) shopAnimals[i] = Animal.RandomAnimal(i);
@@ -54,7 +79,7 @@ namespace ZooManagementSystem
         private static void PurchaseConfirmation(int price, string userChoice)
         {
             Console.Clear();
-            if (Program.UserMoney >= price)
+            if (UserMoney >= price)
             {
                 int specialAnimalChance = Animal.rd.Next(10);
                 int specialAnimalIndex = Animal.rd.Next(SpecialAnimal.specialAnimals.Count);
@@ -68,9 +93,9 @@ namespace ZooManagementSystem
                 }
                 else
                     shopAnimals[exoticness] = Animal.RandomAnimal(exoticness);
-                Program.UserMoney -= price;
-                Program.userAnimals.Add(purchasedAnimal);
-                Program.UpdateIncome();
+                UserMoney -= price;
+                MainMenuManager.userAnimals.Add(purchasedAnimal);
+                UpdateIncome();
                 Console.WriteLine($"You purchased {purchasedAnimal.Name} the {purchasedAnimal.Species} for ${price}!");
             }
             else Console.WriteLine("Not enough money to purchase this animal.");
@@ -89,15 +114,15 @@ namespace ZooManagementSystem
     }
     internal class FreeShopManager //Serves as an easy solution to the issue of the user not being able to do anything when first starting due to no animals and no money
     {
-        internal static Animal firstAnimal = new Animal("Rainier", "Rhino", 3, false);
+        private static Animal firstAnimal = new Animal("Rainier", "Rhino", 3, false);
         private static void HandleFreeShopChoice(string menuChoice)
         {
             switch (menuChoice)
             {
                 case "a":
-                    Program.userAnimals.Add(firstAnimal);
-                    Program.UpdateIncome();
-                    Console.WriteLine($"You purchased {firstAnimal.Name} the {firstAnimal.Species}! \nPress enter to go back to the main menu.");
+                    MainMenuManager.userAnimals.Add(firstAnimal);
+                    ShopManager.UpdateIncome();
+                    Console.WriteLine($"You received {firstAnimal.Name} the {firstAnimal.Species}! \nPress enter to go back to the main menu.");
                     Console.ReadLine();
                     MainMenuManager.MainMenu();
                     break;

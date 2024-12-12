@@ -26,8 +26,8 @@ namespace ZooManagementSystem
         private static string SaveInfo()
         {
             StringBuilder saveInfo = new StringBuilder(); //Must use StringBuilder because strings are immutable after initialized
-            saveInfo.AppendLine(Program.UserMoney.ToString());
-            foreach (Animal animal in Program.userAnimals)
+            saveInfo.AppendLine(ShopManager.UserMoney.ToString());
+            foreach (Animal animal in MainMenuManager.userAnimals)
                 saveInfo.AppendLine($"{animal.Name},{animal.Species},{animal.Income},{animal.IsMythical}");
             return saveInfo.ToString();
         }
@@ -45,15 +45,16 @@ namespace ZooManagementSystem
         private static void LoadMoney(string[] lines) //Loads the first line of save.txt as userMoney. If improperly formatted, userMoney will instead be set to 0
         {
             if (decimal.TryParse(lines[0], out decimal money))
-                Program.UserMoney = money;
+                ShopManager.UserMoney = money;
             else
             {
                 Console.WriteLine("Invalid format in save file. Resetting user money to 0.\n");
-                Program.UserMoney = 0;
+                ShopManager.UserMoney = 0;
             }
         }
         private static void LoadAnimals(string[] lines) //Reconstructs animals from animal data. If data is improperly formatted, an error message is displayed and reconstruction is skipped
         {
+            SpecialAnimal temp;
             for (int i = 1; i < lines.Length; i++)
             {
                 string[] animalData = lines[i].Split(',');
@@ -62,9 +63,12 @@ namespace ZooManagementSystem
                     if (bool.TryParse(animalData[3], out bool isMythical))
                     {
                         if (isMythical)
-                            Program.userAnimals.Add(new SpecialAnimal(animalData[0], animalData[1], income, true));
-                        else
-                            Program.userAnimals.Add(new Animal(animalData[0], animalData[1], income, false));
+                        {
+                            temp = new SpecialAnimal(animalData[0], animalData[1], income, true);
+                            MainMenuManager.userAnimals.Add(temp);
+                            SpecialAnimal.specialAnimals.Remove(temp);
+                        }
+                        else MainMenuManager.userAnimals.Add(new Animal(animalData[0], animalData[1], income, false));
                     }
                     else Console.WriteLine($"Invalid animal isMythical data on line {i + 1}. Skipping.");
                 }
@@ -80,14 +84,14 @@ namespace ZooManagementSystem
                 {
                     LoadMoney(lines);
                     LoadAnimals(lines);
-                    Program.UpdateIncome();
+                    ShopManager.UpdateIncome();
                     Console.WriteLine("Save data loaded. Press enter to continue.");
                     Console.ReadLine();
                     return;
                 }
             }
             Console.WriteLine("Save file is empty or could not be found. Press enter to continue.");
-            Program.UserMoney = 0;
+            ShopManager.UserMoney = 0;
             Console.ReadLine();
         }
     }

@@ -19,10 +19,10 @@ namespace ZooManagementSystem
         }
         internal Animal(string name, string species, int income, bool isMythical)
         {
-            this.Name = name;
-            this.Species = species;
-            this.Income = income;
-            this.IsMythical = isMythical;
+            Name = name;
+            Species = species;
+            Income = income;
+            IsMythical = isMythical;
         }
         internal virtual void DisplayAnimal()
         {
@@ -34,7 +34,8 @@ namespace ZooManagementSystem
             {
                 string[] lines = File.ReadAllLines("names.txt");
                 int n = rd.Next(lines.Length);
-                return lines[n];
+                string name = lines[n];
+                return name.Trim();
             }
             else return "placeholder";
         } //names are from https://www.ssa.gov/oact/babynames/decades/century.html
@@ -113,10 +114,10 @@ namespace ZooManagementSystem
         }; //List of mythical animals with preset fields to allow for unique names, species, and incomes
         internal SpecialAnimal(string name, string species, int income, bool isMythical)
         {
-            this.Name = name;
-            this.Species = species;
-            this.Income = income;
-            this.IsMythical = isMythical;
+            Name = name;
+            Species = species;
+            Income = income;
+            IsMythical = isMythical;
         }
         internal override void DisplayAnimal() //Overrides Animal.DisplayAnimal() to allow different formatting and font color
         {
